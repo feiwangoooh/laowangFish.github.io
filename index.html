@@ -69,6 +69,67 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-matlab-mex-problem-with-vs2017" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/06/12/matlab-mex-problem-with-vs2017/" class="article-date">
+  <time datetime="2019-06-12T01:55:00.000Z" itemprop="datePublished">2019-06-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Compile-Bugs/">Compile Bugs</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/06/12/matlab-mex-problem-with-vs2017/">MatlabMex编译问题</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="images/bug.jpg" alt="mex bug"><br>该博客记录的是解决Matlab Mex编译OpenCV Release文件时出现的问题。由于事先基于OpenCV写了一些提取信号的程序，后面想在Matlab上验证。正好发现了官方提供的Computer Vision System Toolbox OpenCV Interface和mexopencv这两个工具，可以将OpenCV的程序模块通过Mex编译后在Matlab中调用。</p>
+<h3 id="Computer-Vision-System-Toolbox-OpenCV-Interface"><a href="#Computer-Vision-System-Toolbox-OpenCV-Interface" class="headerlink" title="Computer Vision System Toolbox OpenCV Interface"></a>Computer Vision System Toolbox OpenCV Interface</h3><ol>
+<li>这个工具包可以在官方的附加功能中找到，直接下载安装即可，里面提供一个mexOpenCV.m的文件，该文件是用来配置OpenCV的include和lib路径的，然后调用mex命令去编译提前写好的.cpp文件。如果在编译时遇到找不到相关头文件和库的时候需要去检查下该文件的路径配置是否正确。该文件必须包含#”opencvmex.hpp”，位于$$MATLABROOT$$\extern\include中，该头文件包含了如何将Mat数据转成OpenCV数据类型转换函数;包含void mexFunction()入口函数，该函数的详细介绍可在matlab mex教程中查看。</li>
+<li>该工具包还提供了几个样例供测试使用，具体使用方法见官方网站<a href="https://ww2.mathworks.cn/help/vision/ug/opencv-interface.html" target="_blank" rel="noopener">install and use Toolbox OpenCV Interface</a></li>
+<li>该工具更方便自己的个性化使用，通过编写自己的opencv处理程序，生成自定义的功能模块。</li>
+</ol>
+<h3 id="mexopencv"><a href="#mexopencv" class="headerlink" title="mexopencv"></a>mexopencv</h3><ol>
+<li>mexopencv是官方开源一个项目<a href="https://github.com/kyamagu/mexopencv" target="_blank" rel="noopener">mexopencv</a>，用于编译所有的openCV模块，最终跟调用工具包一样方便的在Matlab中使用openCV，安装以配置在网站上说的很详细了，最需要注意的是自己的mexopencv的版本与Matlab的对应。</li>
+<li>该工具编译成功后可以更方便直接的调用openCV现有的各个功能模块，不需要自己去编写.cpp文件了。</li>
+</ol>
+<h3 id="mex编译问题的解决"><a href="#mex编译问题的解决" class="headerlink" title="mex编译问题的解决"></a>mex编译问题的解决</h3><ol>
+<li>无论在工具1还是工具2中最终都需要使用Matlab进行Mex编译，个人使用的是Matlab R2016a + VS2017 + OpenCV3.4.1的配置。</li>
+<li>首先由于需要使用OpenCV，所以必须配置相应的VS编译器，使用MIGW编译器是不行的。窗口命令mex -setup c++配置编译器，如果提示找不到vs编译器，需要去检查$$MATLABROOT$$\bin\win64\mexopts下面有没有与VS版本相对应的.xml文件。由于VS2017的版本Matlab R2016a还没有支持，所以会缺失msvc2017.xml和msvcpp2017.xml。官方给出了bug修复的文件<a href="https://ww2.mathworks.cn/support/bugreports/1487958" target="_blank" rel="noopener">bug解决</a>，去下载attachment文件，并把解压文件放到mexopts文件夹下，这样mex -setup c++就能找到vs编译器。</li>
+<li>编译器配置好后就可以按照各工具相应的安装流程去编译和测试就行了。在这个过程中最容易出现的就是路径错误，需要仔细确认。还有一个编译时错误解决了很久，LINK:error LNK2001:无法解析的外部符号mexfilerequiredapiversion，可能与个人使用的高版本的VS有关。一开始我以为是相应OpenCV库没有链接上，最后发现是.cpp中除了包含void mexFunction()这一个入口函数之外还必须包含void mexfilerequiredapiversion()，因此在opencvmex.hpp头文件（工具1）或者mexopencv.hpp头文件（工具2）中添加了一个空函数。如此就可以成功编译通过了。<br><img src="images/bugsolve.jpg" alt="bug solve"></li>
+</ol>
+<p>写下此文刚过端午假期</p>
+<blockquote>
+<p>端午即事<br>宋·文天祥<br>五月五日午，赠我一支艾。<br>古人不可见，新知万里外<br>丹心照夙昔，鬓发日已改。<br>我欲从灵均，三湘隔辽海。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/06/12/matlab-mex-problem-with-vs2017/" data-id="cjwso026f0000zwomqejcm7v4" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Matlab-Mex/">Matlab Mex</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/VS2017/">VS2017</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-remote-sensing-competition-baidu" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/03/21/remote-sensing-competition-baidu/" class="article-date">
@@ -134,7 +195,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/03/21/remote-sensing-competition-baidu/" data-id="cjwskl8be0000o4omjtgkor3v" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/03/21/remote-sensing-competition-baidu/" data-id="cjwso027t0007zwomhdymjzoa" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Region-Grow/">Region Grow</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Remote-Sensing/">Remote Sensing</a></li></ul>
@@ -156,7 +217,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">分类</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Competition/">Competition</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Competition/">Competition</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Compile-Bugs/">Compile Bugs</a></li></ul>
     </div>
   </div>
 
@@ -166,7 +227,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Region-Grow/">Region Grow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Remote-Sensing/">Remote Sensing</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Matlab-Mex/">Matlab Mex</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Region-Grow/">Region Grow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Remote-Sensing/">Remote Sensing</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VS2017/">VS2017</a></li></ul>
     </div>
   </div>
 
@@ -176,7 +237,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li></ul>
     </div>
   </div>
 
@@ -187,6 +248,10 @@
     <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/06/12/matlab-mex-problem-with-vs2017/">MatlabMex编译问题</a>
+          </li>
         
           <li>
             <a href="/2019/03/21/remote-sensing-competition-baidu/">百度遥感图像比赛</a>
